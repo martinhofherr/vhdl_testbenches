@@ -1,0 +1,5 @@
+*.swp
+*.pyc
+*.cf
+*.xml
+sim_build*
