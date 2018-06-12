@@ -34,18 +34,41 @@ class Bin2BcdDriver(object):
 
 		edge = RisingEdge(self._clk)
 
+		val = self._generator() 
+
 		while True:
-			val = next(self._generator())
-			self._data <= val
+			self._data <= next(val)
 			self._start <= 1
 			for _ in range(3):
 				yield edge
 			self._start <= 0
 			yield FallingEdge(self._busy)
 
+# generator function used by Bin2BcdDriver to generate the input data.
 def number_gen():
-	for i in range(0, 256):
-		yield i
+	i = 0;
+	while True:
+		yield i;
+		i = (i+1) % 255
+
+# Monitor class that collects bin2bcds output in an deque
+class Bin2BcdMonitor(Monitor):
+	def __init__(self, name, bcd_out, busy):
+		self._name = name
+		self._bcd_out = bcd_out
+		self._busy = busy
+		Monitor.__init__(self)
+	
+
+	@coroutine
+	def _monitor_recv(self):
+		busy_falling = FallingEdge(self._busy)
+
+		while True:
+			yield busy_falling
+			vec = self._bcd_out.value
+			self._recv(vec)
+
 
 # ==============================================================================
 @cocotb.coroutine
@@ -66,6 +89,9 @@ class BIN2BCD_TB:
 		#setup stimulus driver
 		self.stim = Bin2BcdDriver(dut.clk_i, dut.start_i, dut.busy_o, dut.data_i, number_gen)
 
+		#setup output mointor that collects output of bin2bcd on falling edge of busy
+		self.monitor = Bin2BcdMonitor("Bin2BcdMonitor", self.dut.bcd_o, self.dut.busy_o)
+
 	def start(self):
 		self.stim.start()
 	
@@ -84,7 +110,7 @@ def run_test(dut):
 
     # Apply random input data by input_gen via BitDriver for 100 clock cycle.
     tb.start()
-    for i in range(100):
+    for i in range(10000):
         yield clkedge
 
     # Stop generation of input data. One more clock cycle is needed to capture
