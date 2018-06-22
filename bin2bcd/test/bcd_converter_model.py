@@ -3,8 +3,7 @@
 
 import math as m
 
-def int2digits(num):
-    ndigs = m.floor(m.log10(num))
+def int2digits(num, ndigs):
     bcd = 0                        
     for i in range(ndigs, -1, -1):
         dig = num // pow(10,i)
