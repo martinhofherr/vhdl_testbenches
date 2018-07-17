@@ -16,6 +16,7 @@ def basic_test(dut):
     yield Timer(10000)
     dut.reset_n_i <= 1
     dut.step_i <= 1
+    dut.enable_i <= 1
 
 
     for i in range(1, 254, 5):

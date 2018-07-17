@@ -7,6 +7,7 @@ entity up_down_counter is
     port(clk_i      : in std_ulogic;
          reset_n_i  : in std_ulogic;
 
+         enable_i   : in std_ulogic;
          step_i     : in std_ulogic_vector(WIDTH-1 downto 0);
          count_o    : out std_ulogic_vector(WIDTH-1 downto 0);
          dir_o      : out std_ulogic
@@ -27,23 +28,25 @@ begin
                 cnt_reg <= (others => '0');
                 cnt_dn <= '0';
             else
-                cnt_val := '0' & cnt_reg;
+                if enable_i = '1' then
+                    cnt_val := '0' & cnt_reg;
 
-                if cnt_dn = '0' then
-                    cnt_val := std_ulogic_vector(unsigned(cnt_val) + unsigned(step_i));
-                    cnt_next := std_ulogic_vector(unsigned(cnt_val) + unsigned(step_i));
-                    -- Check guard bit
-                    if cnt_next(WIDTH) = '1' then
-                        cnt_dn <= '1';
+                    if cnt_dn = '0' then
+                        cnt_val := std_ulogic_vector(unsigned(cnt_val) + unsigned(step_i));
+                        cnt_next := std_ulogic_vector(unsigned(cnt_val) + unsigned(step_i));
+                        -- Check guard bit
+                        if cnt_next(WIDTH) = '1' then
+                            cnt_dn <= '1';
+                        end if;
+                    else
+                        cnt_val := std_ulogic_vector(unsigned(cnt_val) - unsigned(step_i));
+                        cnt_next := std_ulogic_vector(unsigned(cnt_val) - unsigned(step_i));
+                        if cnt_next(WIDTH) = '1' then
+                            cnt_dn <= '0';
+                        end if;
                     end if;
-                else
-                    cnt_val := std_ulogic_vector(unsigned(cnt_val) - unsigned(step_i));
-                    cnt_next := std_ulogic_vector(unsigned(cnt_val) - unsigned(step_i));
-                    if cnt_next(WIDTH) = '1' then
-                        cnt_dn <= '0';
-                    end if;
-               end if;
-               cnt_reg <= cnt_val(WIDTH-1 downto 0);
+                    cnt_reg <= cnt_val(WIDTH-1 downto 0);
+                end if;
            end if;
         end if;
     end process;
