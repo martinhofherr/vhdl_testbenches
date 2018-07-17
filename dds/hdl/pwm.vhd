@@ -9,6 +9,7 @@ entity pwm is
 
          compare_max_i  : in std_ulogic_vector(WIDTH-1 downto 0);
          compare_i      : in std_ulogic_vector(WIDTH-1 downto 0);
+         cycle_start_o  : out std_ulogic;
          pwm_o          : out std_ulogic
     );
 end entity;
@@ -22,11 +23,14 @@ begin
         if rising_edge(clk_i) then
             if reset_n_i = '0' then
                 counter <= (others => '0');
+                cycle_start_o <= '0';
             else
                 if counter = to_unsigned(0, counter'length) then
                     counter <= unsigned(compare_max_i);
+                    cycle_start_o <= '1';
                 else
                     counter <= counter - 1;
+                    cycle_start_o <= '0';
                 end if;
             end if;
         end if;

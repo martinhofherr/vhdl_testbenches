@@ -7,6 +7,7 @@ entity dds is
          reset_n_i  : in std_ulogic;
 
          step_i     : in std_ulogic_vector(7 downto 0);
+         enable_i   : in std_ulogic;
          dds_o      : out std_ulogic_vector(8 downto 0)
     );
 end entity;
@@ -24,6 +25,7 @@ architecture BEHAV of dds is
         port(clk_i      : in std_ulogic;
              reset_n_i  : in std_ulogic;
 
+             enable_i   : in std_ulogic;
              step_i     : in std_ulogic_vector(WIDTH-1 downto 0);
              count_o    : out std_ulogic_vector(WIDTH-1 downto 0);
              dir_o      : out std_ulogic
@@ -52,6 +54,7 @@ begin
     generic map(WIDTH => 8)
     port map(clk_i => clk_i,
              reset_n_i => reset_n_i,
+             enable_i  => enable_i,
              step_i => step_i,
              count_o => rom_addr,
              dir_o => cnt_dir
